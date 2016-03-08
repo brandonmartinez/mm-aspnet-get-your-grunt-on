@@ -249,3 +249,7 @@ _Pvt_Extensions
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+# Application Specific Ignores
+src/mm-aspnet-get-your-grunt-on/bower_components/
+src/mm-aspnet-get-your-grunt-on/wwwroot/vendor/

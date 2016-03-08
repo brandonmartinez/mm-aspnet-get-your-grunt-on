@@ -1,33 +1,62 @@
 /*global module:false*/
-module.exports = function (grunt) {
+module.exports = function(grunt) {
+    'use strict';
+    require('load-grunt-tasks')(grunt);
 
-    // Project configuration.
     grunt.initConfig({
-        // Metadata.
         pkg: grunt.file.readJSON('package.json'),
-        banner: '/*! <%= pkg.title || pkg.name %> - v<%= pkg.version %> - ' +
-        '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
-        '<%= pkg.homepage ? "* " + pkg.homepage + "\\n" : "" %>' +
-        '* Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author.name %>;' +
-        ' Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %> */\n',
-        // Task configuration.
-        concat: {
-            options: {
-                banner: '<%= banner %>',
-                stripBanners: true
+        clean: {
+            vendor: {
+                src: ["wwwroot/vendor/**"]
+            }
+        },
+        copy: {
+            vendor: {
+                files: [
+                    // includes files within path
+                    {
+                        expand: true,
+                        cwd: 'bower_components/bootstrap/dist/fonts/',
+                        src: ['**'],
+                        dest: 'wwwroot/vendor/fonts',
+                        filter: 'isFile'
+                    }
+                ],
             },
-            dist: {
-                src: ['lib/<%= pkg.name %>.js'],
-                dest: 'dist/<%= pkg.name %>.js'
+        },
+        bower_concat: {
+            vendor: {
+                dest: {
+                    js: 'wwwroot/vendor/scripts.js',
+                    css: 'wwwroot/vendor/styles.css'
+                },
+                bowerOptions: {
+                    relative: false
+                },
+                mainFiles: {
+                    'bootstrap': ['dist/css/bootstrap.css', 'dist/css/bootstrap-theme.css', 'dist/js/bootstrap.js']
+                },
+                process: function(src) {
+                    // Changing relative pathing to point at vendor subfolder
+                    return src.replace(new RegExp('../fonts/', 'g'), '../vendor/fonts/');
+                }
             }
         },
         uglify: {
+            vendor: {
+                src: 'wwwroot/vendor/scripts.js',
+                dest: 'wwwroot/vendor/scripts.min.js'
+            }
+        },
+        cssmin: {
             options: {
-                banner: '<%= banner %>'
+                shorthandCompacting: false,
+                roundingPrecision: -1
             },
-            dist: {
-                src: '<%= concat.dist.dest %>',
-                dest: 'dist/<%= pkg.name %>.min.js'
+            vendor: {
+                files: {
+                    'wwwroot/vendor/styles.min.css': 'wwwroot/vendor/styles.css'
+                }
             }
         },
         jshint: {
@@ -54,8 +83,13 @@ module.exports = function (grunt) {
                 src: ['lib/**/*.js', 'test/**/*.js']
             }
         },
-        nodeunit: {
-            files: ['test/**/*_test.js']
+        parallel: {
+            vendor: {
+                options: {
+                    grunt: true
+                },
+                tasks: ['copy:vendor', 'uglify:vendor', 'cssmin:vendor']
+            }
         },
         watch: {
             gruntfile: {
@@ -69,14 +103,9 @@ module.exports = function (grunt) {
         }
     });
 
-    // These plugins provide necessary tasks.
-    grunt.loadNpmTasks('grunt-contrib-concat');
-    grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-contrib-nodeunit');
-    grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.loadNpmTasks('grunt-contrib-watch');
-
     // Default task.
-    grunt.registerTask('default', ['jshint', 'nodeunit', 'concat', 'uglify']);
+    grunt.registerTask('build:vendor', ['clean:vendor', 'bower_concat:vendor', 'parallel:vendor']);
+    grunt.registerTask('build', ['build:vendor']);
+    grunt.registerTask('default', ['jshint', 'concat', 'uglify']);
 
 };
