@@ -1,4 +1,5 @@
-/*global module:false*/
+/*global require, module:false*/
+
 module.exports = function(grunt) {
     'use strict';
     require('load-grunt-tasks')(grunt);
@@ -7,7 +8,10 @@ module.exports = function(grunt) {
         pkg: grunt.file.readJSON('package.json'),
         clean: {
             vendor: {
-                src: ["wwwroot/vendor/**"]
+                src: ['wwwroot/vendor/**']
+            },
+            app: {
+                src: ['wwwroot/app/**']
             }
         },
         copy: {
@@ -21,8 +25,8 @@ module.exports = function(grunt) {
                         dest: 'wwwroot/vendor/fonts',
                         filter: 'isFile'
                     }
-                ],
-            },
+                ]
+            }
         },
         bower_concat: {
             vendor: {
@@ -46,6 +50,27 @@ module.exports = function(grunt) {
             vendor: {
                 src: 'wwwroot/vendor/scripts.js',
                 dest: 'wwwroot/vendor/scripts.min.js'
+            },
+            app: {
+                options: {
+                    sourceMap: true,
+                },
+                src: [
+                    'wwwroot/js/app.js',
+                    'wwwroot/js/**/*.js'
+                ],
+                dest: 'wwwroot/app/scripts.min.js'
+            }
+        },
+        sass: {
+            options: {
+                sourceMap: true,
+                outputStyle: 'compressed'
+            },
+            app: {
+                files: {
+                    'wwwroot/app/styles.min.css': 'wwwroot/css/styles.scss'
+                }
             }
         },
         cssmin: {
@@ -63,24 +88,23 @@ module.exports = function(grunt) {
             options: {
                 curly: true,
                 eqeqeq: true,
-                immed: true,
                 latedef: true,
-                newcap: true,
                 noarg: true,
-                sub: true,
                 undef: true,
                 unused: true,
                 boss: true,
-                eqnull: true,
+                eqnull: false,
+                browser: true,
                 globals: {
                     jQuery: true
-                }
+                },
+                reporter: require('jshint-stylish').toString()
             },
             gruntfile: {
                 src: 'Gruntfile.js'
             },
-            lib_test: {
-                src: ['lib/**/*.js', 'test/**/*.js']
+            app: {
+                src: ['wwwroot/js/**/*.js']
             }
         },
         parallel: {
@@ -89,6 +113,12 @@ module.exports = function(grunt) {
                     grunt: true
                 },
                 tasks: ['copy:vendor', 'uglify:vendor', 'cssmin:vendor']
+            },
+            app: {
+                options: {
+                    grunt: true
+                },
+                tasks: ['uglify:app', 'sass:app']
             }
         },
         watch: {
@@ -103,9 +133,12 @@ module.exports = function(grunt) {
         }
     });
 
-    // Default task.
+    // Register Custom Grunt Tasks
     grunt.registerTask('build:vendor', ['clean:vendor', 'bower_concat:vendor', 'parallel:vendor']);
-    grunt.registerTask('build', ['build:vendor']);
-    grunt.registerTask('default', ['jshint', 'concat', 'uglify']);
 
+    grunt.registerTask('build:app', ['clean:app', 'jshint:app', 'parallel:app']);
+
+    grunt.registerTask('build', ['build:vendor', 'build:app']);
+
+    grunt.registerTask('default', 'build');
 };

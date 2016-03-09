@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNet.Builder;
+﻿using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
+using Microsoft.AspNet.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -15,9 +12,7 @@ namespace mm_aspnet_get_your_grunt_on
         public Startup(IHostingEnvironment env)
         {
             // Set up configuration sources.
-            var builder = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .AddEnvironmentVariables();
+            var builder = new ConfigurationBuilder().AddJsonFile("appsettings.json").AddEnvironmentVariables();
             Configuration = builder.Build();
         }
 
@@ -36,7 +31,7 @@ namespace mm_aspnet_get_your_grunt_on
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
-            if (env.IsDevelopment())
+            if(env.IsDevelopment())
             {
                 app.UseBrowserLink();
                 app.UseDeveloperExceptionPage();
@@ -48,14 +43,19 @@ namespace mm_aspnet_get_your_grunt_on
 
             app.UseIISPlatformHandler();
 
-            app.UseStaticFiles();
+            // Set up custom content types
+            var provider = new FileExtensionContentTypeProvider();
 
-            app.UseMvc(routes =>
+            // To serve for CSS map file purposes
+            provider.Mappings.Add(".scss", "text/scss");
+
+            // Serve static files
+            app.UseStaticFiles(new StaticFileOptions
             {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                ContentTypeProvider = provider
             });
+
+            app.UseMvc(routes => { routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}"); });
         }
 
         // Entry point for the application.

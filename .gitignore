@@ -253,3 +253,4 @@ _Pvt_Extensions
 # Application Specific Ignores
 src/mm-aspnet-get-your-grunt-on/bower_components/
 src/mm-aspnet-get-your-grunt-on/wwwroot/vendor/
+src/mm-aspnet-get-your-grunt-on/wwwroot/app/
