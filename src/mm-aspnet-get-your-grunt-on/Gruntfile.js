@@ -1,3 +1,4 @@
+/// <binding AfterBuild='build' />
 /*global require, module:false*/
 
 module.exports = function(grunt) {
