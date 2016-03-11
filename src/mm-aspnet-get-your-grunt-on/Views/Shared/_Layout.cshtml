@@ -40,5 +40,9 @@
     <script type="text/javascript" src="~/app/scripts.min.js" asp-append-version="true"></script>
 
     @RenderSection("scripts", required: false)
+    
+    <environment names="Development">
+        <script src="//localhost:35729/livereload.js"></script>
+    </environment>
 </body>
 </html>

@@ -7,7 +7,11 @@ function HomeViewModel() {
         var $informationContainers = $('#home-information > div');
 
         setInterval(function () {
-            $informationContainers.animateCss('bounce');
+            $informationContainers
+                // (Un)comment to see livereload in action!
+                .animateCss('bounce')
+                //.animateCss('pulse')
+            ;
         }, 2000);
     };
 }

@@ -1,4 +1,4 @@
-/// <binding AfterBuild='build' />
+/// <binding ProjectOpened='build, watch' />
 /*global require, module:false*/
 
 module.exports = function(grunt) {
@@ -6,7 +6,6 @@ module.exports = function(grunt) {
     require('load-grunt-tasks')(grunt);
 
     grunt.initConfig({
-        pkg: grunt.file.readJSON('package.json'),
         clean: {
             vendor: {
                 src: ['wwwroot/vendor/**']
@@ -123,13 +122,26 @@ module.exports = function(grunt) {
             }
         },
         watch: {
-            gruntfile: {
-                files: '<%= jshint.gruntfile.src %>',
-                tasks: ['jshint:gruntfile']
+            appCss: {
+                files: 'wwwroot/css/**/*.{css,scss}',
+                tasks: ['sass:app'],
+                options: {
+                    livereload: true,
+                }
             },
-            lib_test: {
-                files: '<%= jshint.lib_test.src %>',
-                tasks: ['jshint:lib_test', 'nodeunit']
+            appJs: {
+                files: 'wwwroot/js/**/*.js',
+                tasks: ['jshint:app', 'uglify:app'],
+                options: {
+                    livereload: true,
+                }
+            },
+            bower: {
+                files: 'bower_components/**',
+                tasks: ['build:vendor'],
+                options: {
+                    livereload: true,
+                }
             }
         }
     });
